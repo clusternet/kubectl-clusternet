@@ -19,6 +19,14 @@ package plugin
 import (
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/kubectl/pkg/cmd/apply"
+	"k8s.io/kubectl/pkg/cmd/create"
+	"k8s.io/kubectl/pkg/cmd/delete"
+	"k8s.io/kubectl/pkg/cmd/edit"
+	"k8s.io/kubectl/pkg/cmd/get"
+	"k8s.io/kubectl/pkg/cmd/scale"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 // ClusternetOptions provides information required to make requests to Clusternet
@@ -41,7 +49,7 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 	o := NewClusternetOptions(streams)
 
 	cmd := &cobra.Command{
-		Use:          "clusternet [sub-command] [flags]",
+		Use:          "clusternet",
 		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			if err := o.Complete(c, args); err != nil {
@@ -58,7 +66,23 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 		},
 	}
 
+	flags := cmd.PersistentFlags()
+	flags.SetNormalizeFunc(cliflag.WarnWordSepNormalizeFunc) // Warn for "_" flags
+
 	o.configFlags.AddFlags(cmd.Flags())
+
+	kubeConfigFlags := genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag()
+	kubeConfigFlags.AddFlags(flags)
+
+	f := cmdutil.NewFactory(NewClusternetGetter(kubeConfigFlags))
+
+	// add subcommands
+	cmd.AddCommand(create.NewCmdCreate(f, streams))
+	cmd.AddCommand(get.NewCmdGet("kubectl", f, streams))
+	cmd.AddCommand(apply.NewCmdApply("kubectl", f, streams))
+	cmd.AddCommand(delete.NewCmdDelete(f, streams))
+	cmd.AddCommand(scale.NewCmdScale(f, streams))
+	cmd.AddCommand(edit.NewCmdEdit(f, streams))
 
 	return cmd
 }
