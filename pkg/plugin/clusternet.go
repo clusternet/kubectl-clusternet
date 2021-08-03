@@ -27,6 +27,8 @@ import (
 	"k8s.io/kubectl/pkg/cmd/get"
 	"k8s.io/kubectl/pkg/cmd/scale"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+
+	"github.com/clusternet/kubectl-clusternet/pkg/version"
 )
 
 // ClusternetOptions provides information required to make requests to Clusternet
@@ -83,6 +85,9 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 	cmd.AddCommand(delete.NewCmdDelete(f, streams))
 	cmd.AddCommand(scale.NewCmdScale(f, streams))
 	cmd.AddCommand(edit.NewCmdEdit(f, streams))
+
+	// add subcommand version
+	cmd.AddCommand(version.NewCmdVersion(streams))
 
 	return cmd
 }
