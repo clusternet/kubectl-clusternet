@@ -1,0 +1,39 @@
+project_name: kubectl-clusternet
+release:
+  github:
+    owner: clusternet
+    name: kubectl-clusternet
+builds:
+  - id: kubectl-clusternet
+    goos:
+    - linux
+    - darwin
+    goarch:
+    - amd64
+    - arm
+    - arm64
+    - "386"
+    # Set the modified timestamp on the output binary, typically
+    # you would do this to ensure a build was reproducible. Pass
+    # empty string to skip modifying the output.
+    # Default is empty string.
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    # Set a specific go binary to use when building. It is safe to ignore
+    # this option in most cases.
+    # Default is "go"
+    gobinary: "go"
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    main: cmd/kubectl-clusternet.go
+    ldflags: -s -w
+      -X github.com/clusternet/kubectl-clusternet/pkg/version.gitVersion={{.Version}}
+      -X github.com/clusternet/kubectl-clusternet/pkg/version.gitCommit={{.Commit}}
+      -X github.com/clusternet/kubectl-clusternet/pkg/version.buildDate={{.Date}}
+archives:
+  - id: kubectl-clusternet
+    builds:
+    - kubectl-clusternet
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      386: i386
