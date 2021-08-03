@@ -17,17 +17,27 @@ limitations under the License.
 package main
 
 import (
+	goflag "flag"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/klog/v2"
 
 	"github.com/clusternet/kubectl-clusternet/pkg/plugin"
 )
 
 func main() {
-	flags := pflag.NewFlagSet("kubectl-clusternet", pflag.ExitOnError)
-	pflag.CommandLine = flags
+	rand.Seed(time.Now().UnixNano())
+
+	klog.InitFlags(goflag.CommandLine)
+	defer klog.Flush()
+
+	pflag.CommandLine.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
+	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 
 	root := plugin.NewCmdClusternet(genericclioptions.IOStreams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr})
 	if err := root.Execute(); err != nil {
