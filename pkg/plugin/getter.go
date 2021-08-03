@@ -17,6 +17,8 @@ limitations under the License.
 package plugin
 
 import (
+	"net/http"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -24,6 +26,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubectl/pkg/scheme"
+
+	"github.com/clusternet/clusternet/pkg/wrappers/clientgo"
 )
 
 // ClusternetGetter wraps rest.Config for Clusternet.
@@ -42,8 +46,13 @@ func (f *ClusternetGetter) ToRESTConfig() (*rest.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO we should not have to do this.  It smacks of something going wrong.
 	setKubernetesDefaults(clientConfig)
+
+	// apply Clusternet wrapper
+	clientConfig.Wrap(func(rt http.RoundTripper) http.RoundTripper {
+		return clientgo.NewClusternetTransport(clientConfig.Host, rt)
+	})
+
 	return clientConfig, nil
 }
 
