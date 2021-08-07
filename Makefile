@@ -16,7 +16,7 @@ export GO111MODULE=on
 
 .PHONY: bin
 bin: fmt vet
-	go build -o dist/kubectl-clusternet github.com/clusternet/kubectl-clusternet/cmd/kubectl-clusternet
+	go build -o ./dist/kubectl-clusternet ./cmd/kubectl-clusternet.go
 
 # Run go fmt against code
 .PHONY: fmt
