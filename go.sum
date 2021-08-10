@@ -108,8 +108,8 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/cilium/ebpf v0.0.0-20200110133405-4032b1d8aae3/go.mod h1:MA5e5Lr8slmEg9bt0VpxxWqJlO4iwu3FBdHUzV7wQVg=
 github.com/clbanning/x2j v0.0.0-20191024224557-825249438eec/go.mod h1:jMjuTZXRI4dUb/I5gc9Hdhagfvm9+RyrPryS/auMzxE=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/clusternet/clusternet v0.2.1-0.20210802125506-06051d26ab5a h1:6Rk+ppin+JjORM55793OAdYQdlmbutclomhuLZelPi0=
-github.com/clusternet/clusternet v0.2.1-0.20210802125506-06051d26ab5a/go.mod h1:1fiUrArqkxB/kjsLVrHf+BQOMz3Xc1Zaxt/wtg66LhQ=
+github.com/clusternet/clusternet v0.3.0 h1:i1Sadnz/tyCeFYf4V+X8sqHmuGZBw3YEBePVxnc7wI4=
+github.com/clusternet/clusternet v0.3.0/go.mod h1:RKlpW2fO8gWwU33aOnZOo+17CsLFkDhYSOl0aUC3qRo=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
 github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd/go.mod h1:sE/e/2PUdi/liOCUjSTXgM1o87ZssimdTWN964YiIeI=
