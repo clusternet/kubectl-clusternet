@@ -23,7 +23,7 @@ $ kubectl krew install clusternet
 ### Download Binary
 
 Alternatively, `kubectl-clusternet` can be directly downloaded
-from [released packages](https://github.com/clusternet/clusternet/releases).
+from [released packages](https://github.com/clusternet/kubectl-clusternet/releases).
 
 Download a tar file matching your OS/Arch, and extract `kubectl-clusternet` binary from it.
 
