@@ -17,18 +17,27 @@ limitations under the License.
 package plugin
 
 import (
+	"strings"
+
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/kubectl/pkg/cmd/annotate"
+	"k8s.io/kubectl/pkg/cmd/apiresources"
 	"k8s.io/kubectl/pkg/cmd/apply"
 	"k8s.io/kubectl/pkg/cmd/create"
 	"k8s.io/kubectl/pkg/cmd/delete"
 	"k8s.io/kubectl/pkg/cmd/edit"
 	"k8s.io/kubectl/pkg/cmd/get"
+	"k8s.io/kubectl/pkg/cmd/label"
 	"k8s.io/kubectl/pkg/cmd/scale"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 
 	"github.com/clusternet/kubectl-clusternet/pkg/version"
+)
+
+var (
+	kubectlClusternet = "kubectl clusternet"
 )
 
 // ClusternetOptions provides information required to make requests to Clusternet
@@ -79,16 +88,23 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 	f := cmdutil.NewFactory(NewClusternetGetter(kubeConfigFlags))
 
 	// add subcommands
+	cmd.AddCommand(apiresources.NewCmdAPIResources(f, streams))
 	cmd.AddCommand(create.NewCmdCreate(f, streams))
-	cmd.AddCommand(get.NewCmdGet("kubectl", f, streams))
-	cmd.AddCommand(apply.NewCmdApply("kubectl", f, streams))
+	cmd.AddCommand(get.NewCmdGet(kubectlClusternet, f, streams))
+	cmd.AddCommand(apply.NewCmdApply(kubectlClusternet, f, streams))
 	cmd.AddCommand(delete.NewCmdDelete(f, streams))
 	cmd.AddCommand(scale.NewCmdScale(f, streams))
 	cmd.AddCommand(edit.NewCmdEdit(f, streams))
+	cmd.AddCommand(label.NewCmdLabel(f, streams))
+	cmd.AddCommand(annotate.NewCmdAnnotate(kubectlClusternet, f, streams))
 
 	// add subcommand version
 	cmd.AddCommand(version.NewCmdVersion(streams))
 
+	// replace "kubectl" to "kubectl cluster" in example
+	for _, command := range cmd.Commands() {
+		command.Example = strings.Replace(command.Example, "kubectl", kubectlClusternet, -1)
+	}
 	return cmd
 }
 

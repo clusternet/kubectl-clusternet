@@ -49,12 +49,15 @@ Usage:
   clusternet [command]
 
 Available Commands:
-  apply       Apply a configuration to a resource by filename or stdin
-  create      Create a resource from a file or from stdin.
-  delete      Delete resources by filenames, stdin, resources and names, or by resources and label selector
-  edit        Edit a resource on the server
-  get         Display one or many resources
-  help        Help about any command
-  scale       Set a new size for a Deployment, ReplicaSet or Replication Controller
-  version     Print the plugin version information
+  annotate      Update the annotations on a resource
+  api-resources Print the supported API resources on the server
+  apply         Apply a configuration to a resource by filename or stdin
+  create        Create a resource from a file or from stdin.
+  delete        Delete resources by filenames, stdin, resources and names, or by resources and label selector
+  edit          Edit a resource on the server
+  get           Display one or many resources
+  help          Help about any command
+  label         Update the labels on a resource
+  scale         Set a new size for a Deployment, ReplicaSet or Replication Controller
+  version       Print the plugin version information
 ```
