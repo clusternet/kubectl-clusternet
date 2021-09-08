@@ -110,8 +110,8 @@ github.com/clbanning/x2j v0.0.0-20191024224557-825249438eec/go.mod h1:jMjuTZXRI4
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/clusternet/clusternet v0.3.1-0.20210811115638-49b2e28e6735 h1:18IRsBM03yk02TcHWDdQ9HCC04OcAfiDFUV0kZVGz28=
 github.com/clusternet/clusternet v0.3.1-0.20210811115638-49b2e28e6735/go.mod h1:RKlpW2fO8gWwU33aOnZOo+17CsLFkDhYSOl0aUC3qRo=
-github.com/clusternet/kubectl v0.21.3-0.20210815075235-5d7a0cea019f h1:u2UOyvvyDQdnDEasfEWcZgrbUkL00rtl5UtlgRCyExQ=
-github.com/clusternet/kubectl v0.21.3-0.20210815075235-5d7a0cea019f/go.mod h1:PgeUclpG8VVmmQIl8zpLar3IQEpFc9mrmvlwY3CK1xo=
+github.com/clusternet/kubectl v0.21.3-0.20210908125438-a108a1408243 h1:gzguUQkXnxrJn3+62ESpR6UjvZITqY8wr7bzq7kfDng=
+github.com/clusternet/kubectl v0.21.3-0.20210908125438-a108a1408243/go.mod h1:PgeUclpG8VVmmQIl8zpLar3IQEpFc9mrmvlwY3CK1xo=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
 github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd/go.mod h1:sE/e/2PUdi/liOCUjSTXgM1o87ZssimdTWN964YiIeI=

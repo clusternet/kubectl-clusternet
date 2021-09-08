@@ -19,5 +19,5 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.21.2
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.21.2
 	k8s.io/client-go => k8s.io/client-go v0.21.2
-	k8s.io/kubectl => github.com/clusternet/kubectl v0.21.3-0.20210815075235-5d7a0cea019f
+	k8s.io/kubectl => github.com/clusternet/kubectl v0.21.3-0.20210908125438-a108a1408243
 )
