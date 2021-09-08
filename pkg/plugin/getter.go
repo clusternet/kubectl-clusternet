@@ -46,7 +46,10 @@ func (f *ClusternetGetter) ToRESTConfig() (*rest.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	setKubernetesDefaults(clientConfig)
+	err = setKubernetesDefaults(clientConfig)
+	if err != nil {
+		return nil, err
+	}
 
 	// apply Clusternet wrapper
 	clientConfig.Wrap(func(rt http.RoundTripper) http.RoundTripper {
