@@ -32,7 +32,8 @@ import (
 
 // ClusternetGetter wraps rest.Config for Clusternet.
 type ClusternetGetter struct {
-	Delegate genericclioptions.RESTClientGetter
+	Delegate  genericclioptions.RESTClientGetter
+	ClusterID *string
 }
 
 var _ genericclioptions.RESTClientGetter = &ClusternetGetter{}
@@ -53,6 +54,9 @@ func (f *ClusternetGetter) ToRESTConfig() (*rest.Config, error) {
 
 	// apply Clusternet wrapper
 	clientConfig.Wrap(func(rt http.RoundTripper) http.RoundTripper {
+		if f.ClusterID != nil && len(*f.ClusterID) > 0 {
+			return rt
+		}
 		return clientgo.NewClusternetTransport(clientConfig.Host, rt)
 	})
 
@@ -72,9 +76,10 @@ func (f *ClusternetGetter) ToRESTMapper() (meta.RESTMapper, error) {
 	return f.Delegate.ToRESTMapper()
 }
 
-func NewClusternetGetter(delegate genericclioptions.RESTClientGetter) *ClusternetGetter {
+func NewClusternetGetter(delegate genericclioptions.RESTClientGetter, clusterID *string) *ClusternetGetter {
 	return &ClusternetGetter{
-		Delegate: delegate,
+		Delegate:  delegate,
+		ClusterID: clusterID,
 	}
 }
 

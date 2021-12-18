@@ -17,10 +17,15 @@ limitations under the License.
 package plugin
 
 import (
+	"encoding/base64"
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
+	flag "github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/kubectl/pkg/cmd/annotate"
 	"k8s.io/kubectl/pkg/cmd/apiresources"
@@ -33,6 +38,7 @@ import (
 	"k8s.io/kubectl/pkg/cmd/scale"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 
+	proxiesapi "github.com/clusternet/clusternet/pkg/apis/proxies/v1alpha1"
 	"github.com/clusternet/kubectl-clusternet/pkg/version"
 )
 
@@ -44,15 +50,90 @@ var (
 type ClusternetOptions struct {
 	configFlags *genericclioptions.ConfigFlags
 	genericclioptions.IOStreams
+
+	clusterID       string
+	childKubeConfig string
 }
 
 // NewClusternetOptions provides an instance of ClusternetOptions with default values
 func NewClusternetOptions(streams genericclioptions.IOStreams) *ClusternetOptions {
-	return &ClusternetOptions{
-		configFlags: genericclioptions.NewConfigFlags(true),
-
-		IOStreams: streams,
+	o := &ClusternetOptions{
+		configFlags: genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag(),
+		IOStreams:   streams,
 	}
+	o.configFlags.WrapConfigFn = o.WrapConfigFn
+	return o
+}
+
+// Complete fills in fields required to have valid data
+func (o *ClusternetOptions) Complete() error {
+	// TODO
+
+	return nil
+}
+
+// Validate ensures that all required arguments and flag values are provided
+func (o *ClusternetOptions) Validate() error {
+	if len(o.clusterID) != 0 && len(o.childKubeConfig) == 0 {
+		return fmt.Errorf("please specify a valid kuebconfig for child cluster through '--child-kubeconfig'")
+	}
+
+	if len(o.clusterID) == 0 && len(o.childKubeConfig) != 0 {
+		return fmt.Errorf("please specify a valid cluster UUID with '--cluster-id'")
+	}
+
+	return nil
+}
+
+func (o *ClusternetOptions) Run() error {
+	// TODO
+
+	return nil
+}
+
+func (o *ClusternetOptions) WrapConfigFn(config *rest.Config) *rest.Config {
+	if len(o.childKubeConfig) > 0 {
+		var childConfig *rest.Config
+		clientConfig, err := clientcmd.LoadFromFile(o.childKubeConfig)
+		if err == nil {
+			childConfig, err = clientcmd.NewDefaultClientConfig(*clientConfig, &clientcmd.ConfigOverrides{}).ClientConfig()
+		}
+		if err != nil {
+			panic(fmt.Sprintf("error while loading kubeconfig from file %s: %v", o.childKubeConfig, err))
+		}
+
+		if config.Impersonate.Extra == nil {
+			config.Impersonate.Extra = make(map[string][]string)
+		}
+		config.Impersonate.UserName = "clusternet"
+
+		if len(childConfig.BearerToken) > 0 {
+			config.Impersonate.Extra["Clusternet-Token"] = []string{childConfig.BearerToken}
+		}
+		if len(childConfig.CertData) > 0 {
+			config.Impersonate.Extra["Clusternet-Certificate"] = []string{base64.StdEncoding.EncodeToString(childConfig.CertData)}
+		}
+		if len(childConfig.KeyData) > 0 {
+			config.Impersonate.Extra["Clusternet-PrivateKey"] = []string{base64.StdEncoding.EncodeToString(childConfig.KeyData)}
+		}
+
+		config.Host = strings.Join([]string{
+			strings.TrimRight(config.Host, "/"),
+			fmt.Sprintf("apis/%s/sockets/%s/proxy/direct", proxiesapi.SchemeGroupVersion.String(), o.clusterID),
+		}, "/")
+	}
+
+	return config
+}
+
+func (o *ClusternetOptions) AddFlags(fs *flag.FlagSet, pfs *flag.FlagSet) {
+	o.configFlags.AddFlags(fs)
+
+	pfs.StringVar(&o.clusterID, "cluster-id", o.clusterID,
+		"The child/member cluster UUID. Only works with '--child-kubeconfig'.")
+	pfs.StringVar(&o.childKubeConfig, "child-kubeconfig", o.childKubeConfig,
+		"Path to the kubeconfig file for a child/member cluster. The apiserver url could be an inner address."+
+			" Only works with '--cluster-id'.")
 }
 
 // NewCmdClusternet provides a cobra command wrapping ClusternetOptions
@@ -63,7 +144,7 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 		Use:          "clusternet",
 		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
-			if err := o.Complete(c, args); err != nil {
+			if err := o.Complete(); err != nil {
 				return err
 			}
 			if err := o.Validate(); err != nil {
@@ -80,12 +161,9 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 	flags := cmd.PersistentFlags()
 	flags.SetNormalizeFunc(cliflag.WarnWordSepNormalizeFunc) // Warn for "_" flags
 
-	o.configFlags.AddFlags(cmd.Flags())
+	o.AddFlags(cmd.Flags(), cmd.PersistentFlags())
 
-	kubeConfigFlags := genericclioptions.NewConfigFlags(true).WithDeprecatedPasswordFlag()
-	kubeConfigFlags.AddFlags(flags)
-
-	f := cmdutil.NewFactory(NewClusternetGetter(kubeConfigFlags))
+	f := cmdutil.NewFactory(NewClusternetGetter(o.configFlags, &o.clusterID))
 
 	// add subcommands
 	cmd.AddCommand(apiresources.NewCmdAPIResources(f, streams))
@@ -106,24 +184,4 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 		command.Example = strings.Replace(command.Example, "kubectl", kubectlClusternet, -1)
 	}
 	return cmd
-}
-
-// Complete fills in fields required to have valid data
-func (o *ClusternetOptions) Complete(cmd *cobra.Command, args []string) error {
-	// TODO
-
-	return nil
-}
-
-// Validate ensures that all required arguments and flag values are provided
-func (o *ClusternetOptions) Validate() error {
-	// TODO
-
-	return nil
-}
-
-func (o *ClusternetOptions) Run() error {
-	// TODO
-
-	return nil
 }
