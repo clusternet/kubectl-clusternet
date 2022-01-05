@@ -126,8 +126,8 @@ func (o *ClusternetOptions) WrapConfigFn(config *rest.Config) *rest.Config {
 	return config
 }
 
-func (o *ClusternetOptions) AddFlags(fs *flag.FlagSet, pfs *flag.FlagSet) {
-	o.configFlags.AddFlags(fs)
+func (o *ClusternetOptions) AddFlags(pfs *flag.FlagSet) {
+	o.configFlags.AddFlags(pfs)
 
 	pfs.StringVar(&o.clusterID, "cluster-id", o.clusterID,
 		"The child/member cluster UUID. Only works with '--child-kubeconfig'.")
@@ -158,10 +158,9 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 		},
 	}
 
-	flags := cmd.PersistentFlags()
-	flags.SetNormalizeFunc(cliflag.WarnWordSepNormalizeFunc) // Warn for "_" flags
+	cmd.PersistentFlags().SetNormalizeFunc(cliflag.WarnWordSepNormalizeFunc) // Warn for "_" flags
 
-	o.AddFlags(cmd.Flags(), cmd.PersistentFlags())
+	o.AddFlags(cmd.PersistentFlags())
 
 	f := cmdutil.NewFactory(NewClusternetGetter(o.configFlags, &o.clusterID))
 
