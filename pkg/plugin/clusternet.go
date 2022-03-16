@@ -33,8 +33,10 @@ import (
 	"k8s.io/kubectl/pkg/cmd/create"
 	"k8s.io/kubectl/pkg/cmd/delete"
 	"k8s.io/kubectl/pkg/cmd/edit"
+	cmdexec "k8s.io/kubectl/pkg/cmd/exec"
 	"k8s.io/kubectl/pkg/cmd/get"
 	"k8s.io/kubectl/pkg/cmd/label"
+	"k8s.io/kubectl/pkg/cmd/logs"
 	"k8s.io/kubectl/pkg/cmd/scale"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 
@@ -174,6 +176,8 @@ func NewCmdClusternet(streams genericclioptions.IOStreams) *cobra.Command {
 	cmd.AddCommand(edit.NewCmdEdit(f, streams))
 	cmd.AddCommand(label.NewCmdLabel(f, streams))
 	cmd.AddCommand(annotate.NewCmdAnnotate(kubectlClusternet, f, streams))
+	cmd.AddCommand(cmdexec.NewCmdExec(f, streams))
+	cmd.AddCommand(logs.NewCmdLogs(f, o.IOStreams))
 
 	// add subcommand version
 	cmd.AddCommand(version.NewCmdVersion(streams))
