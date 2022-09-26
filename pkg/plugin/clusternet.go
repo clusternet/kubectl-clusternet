@@ -26,6 +26,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/transport"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/kubectl/pkg/cmd/annotate"
 	"k8s.io/kubectl/pkg/cmd/apiresources"
@@ -45,6 +46,10 @@ import (
 	"github.com/clusternet/kubectl-clusternet/pkg/version"
 )
 
+const (
+	headerPrefix = "Clusternet-"
+)
+
 var (
 	kubectlClusternet = "kubectl clusternet"
 )
@@ -56,6 +61,11 @@ type ClusternetOptions struct {
 
 	clusterID       string
 	childKubeConfig string
+
+	// for child cluster impersonation
+	as      string
+	asUID   string
+	asGroup []string
 }
 
 // NewClusternetOptions provides an instance of ClusternetOptions with default values
@@ -110,14 +120,24 @@ func (o *ClusternetOptions) WrapConfigFn(config *rest.Config) *rest.Config {
 		}
 		config.Impersonate.UserName = "clusternet"
 
+		if len(o.as) > 0 {
+			config.Impersonate.Extra[fmt.Sprintf("%s%s", headerPrefix, transport.ImpersonateUserHeader)] = []string{o.as}
+		}
+		if len(o.asUID) > 0 {
+			config.Impersonate.Extra[fmt.Sprintf("%s%s", headerPrefix, transport.ImpersonateUIDHeader)] = []string{o.asUID}
+		}
+		if len(o.asGroup) > 0 {
+			config.Impersonate.Extra[fmt.Sprintf("%s%s", headerPrefix, transport.ImpersonateGroupHeader)] = o.asGroup
+		}
+
 		if len(childConfig.BearerToken) > 0 {
-			config.Impersonate.Extra["Clusternet-Token"] = []string{childConfig.BearerToken}
+			config.Impersonate.Extra[fmt.Sprintf("%sToken", headerPrefix)] = []string{childConfig.BearerToken}
 		}
 		if len(childConfig.CertData) > 0 {
-			config.Impersonate.Extra["Clusternet-Certificate"] = []string{base64.StdEncoding.EncodeToString(childConfig.CertData)}
+			config.Impersonate.Extra[fmt.Sprintf("%sCertificate", headerPrefix)] = []string{base64.StdEncoding.EncodeToString(childConfig.CertData)}
 		}
 		if len(childConfig.KeyData) > 0 {
-			config.Impersonate.Extra["Clusternet-PrivateKey"] = []string{base64.StdEncoding.EncodeToString(childConfig.KeyData)}
+			config.Impersonate.Extra[fmt.Sprintf("%sPrivateKey", headerPrefix)] = []string{base64.StdEncoding.EncodeToString(childConfig.KeyData)}
 		}
 
 		config.Host = strings.Join([]string{
@@ -133,10 +153,19 @@ func (o *ClusternetOptions) AddFlags(pfs *flag.FlagSet) {
 	o.configFlags.AddFlags(pfs)
 
 	pfs.StringVar(&o.clusterID, "cluster-id", o.clusterID,
-		"The child/member cluster UUID. Only works with '--child-kubeconfig'.")
+		"[Clusternet] The child/member cluster UUID. Only works with '--child-kubeconfig'.")
 	pfs.StringVar(&o.childKubeConfig, "child-kubeconfig", o.childKubeConfig,
-		"Path to the kubeconfig file for a child/member cluster. The apiserver url could be an inner address."+
+		"[Clusternet] Path to the kubeconfig file for a child/member cluster. The apiserver url could be an inner address."+
 			" Only works with '--cluster-id'.")
+	pfs.StringVar(&o.as, "clusternet-as", o.as,
+		"[Clusternet] Username to impersonate for the operation to child cluster. User could be a regular user "+
+			"or a service account in a namespace. Only works with '--child-kubeconfig'.")
+	pfs.StringVar(&o.asUID, "clusternet-as-uid", o.asUID,
+		"[Clusternet] UID to impersonate for the operation to child cluster, this flag can be repeated to "+
+			"specify multiple groups. Only works with '--child-kubeconfig'.")
+	pfs.StringArrayVar(&o.asGroup, "clusternet-as-group", o.asGroup,
+		"[Clusternet] Group to impersonate for the operation to child cluster, this flag can be repeated to "+
+			"specify multiple groups. Only works with '--child-kubeconfig'.")
 }
 
 // NewCmdClusternet provides a cobra command wrapping ClusternetOptions
