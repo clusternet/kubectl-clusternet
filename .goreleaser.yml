@@ -34,6 +34,8 @@ archives:
   - id: kubectl-clusternet
     builds:
     - kubectl-clusternet
-    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      386: i386
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Os }}_
+      {{- if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}{{ with .Arm }}v{{ . }}{{ end }}
