@@ -88,7 +88,7 @@ func (o *ClusternetOptions) Complete() error {
 // Validate ensures that all required arguments and flag values are provided
 func (o *ClusternetOptions) Validate() error {
 	if len(o.clusterID) != 0 && len(o.childKubeConfig) == 0 {
-		return fmt.Errorf("please specify a valid kuebconfig for child cluster through '--child-kubeconfig'")
+		return fmt.Errorf("please specify a valid kubeconfig for child cluster through '--child-kubeconfig'")
 	}
 
 	if len(o.clusterID) == 0 && len(o.childKubeConfig) != 0 {
